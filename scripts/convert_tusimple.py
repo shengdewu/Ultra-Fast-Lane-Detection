@@ -4,7 +4,7 @@ import tqdm
 import numpy as np
 import pdb
 import json, argparse
-
+from shutil import copyfile
 
 def calc_k(line):
     '''
@@ -35,10 +35,12 @@ def draw(im,line,idx,show = False):
     for i in range(len(line_x)-1):
         cv2.line(im,pt0,(int(line_x[i+1]),int(line_y[i+1])),(idx,),thickness = 16)
         pt0 = (int(line_x[i+1]),int(line_y[i+1]))
-def get_tusimple_list(root, label_list):
+
+def get_tusimple_list(root, label_list, sub_path='train/'):
     '''
     Get all the files' names from the json annotation
     '''
+    root = root + '/' + sub_path
     label_json_all = []
     for l in label_list:
         l = os.path.join(root,l)
@@ -63,12 +65,16 @@ def get_tusimple_list(root, label_list):
 
     return names,line_txt
 
-def generate_segmentation_and_train_list(root, line_txt, names):
+def generate_segmentation_and_train_list(root, save_path, line_txt, names, sub_path='train/'):
     """
     The lane annotations of the Tusimple dataset is not strictly in order, so we need to find out the correct lane order for segmentation.
     We use the same definition as CULane, in which the four lanes from left to right are represented as 1,2,3,4 in segentation label respectively.
     """
-    train_gt_fp = open(os.path.join(root,'train_gt.txt'),'w')
+    img_root = root + '/' + sub_path
+    img_save_path = save_path + '/' + sub_path
+    os.makedirs(save_path, exist_ok=True)
+
+    train_gt_fp = open(os.path.join(save_path,'train_gt.txt'),'w')
     
     for i in tqdm.tqdm(range(len(line_txt))):
 
@@ -86,7 +92,7 @@ def generate_segmentation_and_train_list(root, line_txt, names):
         k_neg.sort()
         k_pos.sort()
 
-        label_path = names[i][:-3]+'png'
+        label_path = names[i][:-4].replace('/', '-')+'-label.png'
         label = np.zeros((720,1280),dtype=np.uint8)
         bin_label = [0,0,0,0]
         if len(k_neg) == 1:                                           # for only one lane in the left
@@ -127,29 +133,37 @@ def generate_segmentation_and_train_list(root, line_txt, names):
             bin_label[2] = 1
             bin_label[3] = 1
 
-        cv2.imwrite(os.path.join(root,label_path),label)
+        cv2.imwrite(os.path.join(img_save_path, label_path),label)
+        save_name = names[i].replace('/', '-')
+        copyfile(os.path.join(img_root, names[i]), os.path.join(img_save_path, save_name))
 
-
-        train_gt_fp.write(names[i] + ' ' + label_path + ' '+' '.join(list(map(str,bin_label))) + '\n')
+        train_gt_fp.write(save_name + ' ' + label_path + ' '+' '.join(list(map(str,bin_label))) + '\n')
     train_gt_fp.close()
 
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--root', required=True, help='The root of the Tusimple dataset')
+    parser.add_argument('--save', required=True, help='The root of the save dataset')
     return parser
 
 if __name__ == "__main__":
     args = get_args().parse_args()
 
-    # training set
-    names,line_txt = get_tusimple_list(args.root,  ['label_data_0601.json','label_data_0531.json','label_data_0313.json'])
-    # generate segmentation and training list for training
-    generate_segmentation_and_train_list(args.root, line_txt, names)
+    # # training set
+    # names,line_txt = get_tusimple_list(args.root,  ['label_data_0601.json','label_data_0531.json','label_data_0313.json'])
+    # # generate segmentation and training list for training
+    # generate_segmentation_and_train_list(args.root, args.save, line_txt, names)
 
     # testing set
-    names,line_txt = get_tusimple_list(args.root, ['test_tasks_0627.json'])
+    names,line_txt = get_tusimple_list(args.root, ['test_tasks_0627.json'], 'test/')
+
+    img_save_path = args.save + '/test'
+    os.makedirs(img_save_path, exist_ok=True)
+    img_root = args.root + '/test'
     # generate testing set for testing
-    with open(os.path.join(args.root,'test.txt'),'w') as fp:
+    with open(os.path.join(args.save,'test.txt'),'w') as fp:
         for name in names:
-            fp.write(name + '\n')
+            save_name = name.replace('/', '-')
+            fp.write(save_name + '\n')
+            copyfile(os.path.join(img_root, name), os.path.join(img_save_path, save_name))
 
