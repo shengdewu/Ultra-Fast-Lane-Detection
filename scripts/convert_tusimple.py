@@ -36,7 +36,7 @@ def draw(im,line,idx,show = False):
         cv2.line(im,pt0,(int(line_x[i+1]),int(line_y[i+1])),(idx,),thickness = 16)
         pt0 = (int(line_x[i+1]),int(line_y[i+1]))
 
-def get_tusimple_list(root, label_list, sub_path='train/'):
+def get_tusimple_list(root, label_list, sub_path='train'):
     '''
     Get all the files' names from the json annotation
     '''
@@ -65,7 +65,7 @@ def get_tusimple_list(root, label_list, sub_path='train/'):
 
     return names,line_txt
 
-def generate_segmentation_and_train_list(root, save_path, line_txt, names, sub_path='train/'):
+def generate_segmentation_and_train_list(root, save_path, line_txt, names, sub_path='train'):
     """
     The lane annotations of the Tusimple dataset is not strictly in order, so we need to find out the correct lane order for segmentation.
     We use the same definition as CULane, in which the four lanes from left to right are represented as 1,2,3,4 in segentation label respectively.
@@ -137,7 +137,7 @@ def generate_segmentation_and_train_list(root, save_path, line_txt, names, sub_p
         save_name = names[i].replace('/', '-')
         copyfile(os.path.join(img_root, names[i]), os.path.join(img_save_path, save_name))
 
-        train_gt_fp.write(save_name + ' ' + label_path + ' '+' '.join(list(map(str,bin_label))) + '\n')
+        train_gt_fp.write(sub_path + '/' + save_name + ' ' + sub_path + '/' + label_path + ' '+' '.join(list(map(str,bin_label))) + '\n')
     train_gt_fp.close()
 
 def get_args():
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     generate_segmentation_and_train_list(args.root, args.save, line_txt, names)
 
     # testing set
-    names,line_txt = get_tusimple_list(args.root, ['test_tasks_0627.json'], 'test/')
+    names,line_txt = get_tusimple_list(args.root, ['test_tasks_0627.json'], 'test')
 
     img_save_path = args.save + '/test'
     os.makedirs(img_save_path, exist_ok=True)
@@ -164,6 +164,6 @@ if __name__ == "__main__":
     with open(os.path.join(args.save,'test.txt'),'w') as fp:
         for name in names:
             save_name = name.replace('/', '-')
-            fp.write(save_name + '\n')
+            fp.write('test/' + save_name + '\n')
             copyfile(os.path.join(img_root, name), os.path.join(img_save_path, save_name))
 
