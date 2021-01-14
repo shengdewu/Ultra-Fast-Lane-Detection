@@ -71,8 +71,7 @@ def generate_segmentation_and_train_list(root, save_path, line_txt, names, sub_p
     We use the same definition as CULane, in which the four lanes from left to right are represented as 1,2,3,4 in segentation label respectively.
     """
     img_root = root + '/' + sub_path
-    img_save_path = save_path + '/' + sub_path
-    os.makedirs(save_path, exist_ok=True)
+    os.makedirs(save_path + '/' + sub_path, exist_ok=True)
 
     train_gt_fp = open(os.path.join(save_path,'train_gt.txt'),'w')
     
@@ -92,7 +91,6 @@ def generate_segmentation_and_train_list(root, save_path, line_txt, names, sub_p
         k_neg.sort()
         k_pos.sort()
 
-        label_path = names[i][:-4].replace('/', '-')+'-label.png'
         label = np.zeros((720,1280),dtype=np.uint8)
         bin_label = [0,0,0,0]
         if len(k_neg) == 1:                                           # for only one lane in the left
@@ -133,9 +131,10 @@ def generate_segmentation_and_train_list(root, save_path, line_txt, names, sub_p
             bin_label[2] = 1
             bin_label[3] = 1
 
-        cv2.imwrite(os.path.join(img_save_path, label_path),label)
+        label_path = names[i][:-4].replace('/', '-') + '-label.png'
         save_name = names[i].replace('/', '-')
-        copyfile(os.path.join(img_root, names[i]), os.path.join(img_save_path, save_name))
+        cv2.imwrite(os.path.join(save_path + '/' + sub_path, label_path),label)
+        copyfile(os.path.join(img_root, names[i]), os.path.join(save_path + '/' + sub_path, save_name))
 
         train_gt_fp.write(sub_path + '/' + save_name + ' ' + sub_path + '/' + label_path + ' '+' '.join(list(map(str,bin_label))) + '\n')
     train_gt_fp.close()
