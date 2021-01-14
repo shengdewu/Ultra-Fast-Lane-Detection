@@ -45,9 +45,9 @@ def get_args():
 
     return parser
 
-def merge_config():
+def merge_config(win=False):
     args = get_args().parse_args()
-    cfg = Config.fromfile(args.config)
+    cfg = Config.fromfile(args.config, win)
 
     items = ['dataset','data_root','epoch','batch_size','optimizer','learning_rate',
     'weight_decay','momentum','scheduler','steps','gamma','warmup','warmup_iters',
@@ -65,7 +65,8 @@ def save_model(net, optimizer, epoch,save_path, distributed):
         model_state_dict = net.state_dict()
         state = {'model': model_state_dict, 'optimizer': optimizer.state_dict()}
         # state = {'model': model_state_dict}
-        assert os.path.exists(save_path)
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
         model_path = os.path.join(save_path, 'ep%03d.pth' % epoch)
         torch.save(state, model_path)
 

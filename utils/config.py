@@ -75,13 +75,18 @@ class Config(object):
     """
 
     @staticmethod
-    def _file2dict(filename):
+    def _file2dict(filename, win=False):
         filename = osp.abspath(osp.expanduser(filename))
         if filename.endswith('.py'):
             with tempfile.TemporaryDirectory() as temp_config_dir:
                 temp_config_file = tempfile.NamedTemporaryFile(
                     dir=temp_config_dir, suffix='.py')
                 temp_config_name = osp.basename(temp_config_file.name)
+                if win:
+                    import os
+                    temp_config_dir = './tmp/shengdewu'
+                    os.makedirs(temp_config_dir, exist_ok=True)
+
                 shutil.copyfile(filename,
                                 osp.join(temp_config_dir, temp_config_name))
                 temp_module_name = osp.splitext(temp_config_name)[0]
@@ -155,8 +160,8 @@ class Config(object):
         return b
 
     @staticmethod
-    def fromfile(filename):
-        cfg_dict, cfg_text = Config._file2dict(filename)
+    def fromfile(filename, win=False):
+        cfg_dict, cfg_text = Config._file2dict(filename, win)
         return Config(cfg_dict, cfg_text=cfg_text, filename=filename)
 
     @staticmethod
