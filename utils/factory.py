@@ -21,6 +21,8 @@ def get_scheduler(optimizer, cfg, iters_per_epoch):
         scheduler = MultiStepLR(optimizer, cfg.steps, cfg.gamma, iters_per_epoch, cfg.warmup, iters_per_epoch if cfg.warmup_iters is None else cfg.warmup_iters)
     elif cfg.scheduler == 'cos':
         scheduler = CosineAnnealingLR(optimizer, cfg.epoch * iters_per_epoch, eta_min = 0, warmup = cfg.warmup, warmup_iters = cfg.warmup_iters)
+    elif cfg.scheduler == 'expone':
+        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, cfg.decay_rate)
     else:
         raise NotImplementedError
     return scheduler
