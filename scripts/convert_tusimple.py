@@ -6,6 +6,8 @@ import pdb
 import json, argparse
 from shutil import copyfile
 
+from scripts.convert_label import LaneClsDataset
+
 def calc_k(line):
     '''
     Calculate the direction of lanes
@@ -74,7 +76,9 @@ def generate_segmentation_and_train_list(root, save_path, line_txt, names, sub_p
     os.makedirs(save_path + '/' + sub_path, exist_ok=True)
 
     train_gt_fp = open(os.path.join(save_path,'train_gt.txt'),'w')
-    
+
+    create_label = LaneClsDataset()
+
     for i in tqdm.tqdm(range(len(line_txt))):
 
         tmp_line = line_txt[i]
@@ -132,11 +136,14 @@ def generate_segmentation_and_train_list(root, save_path, line_txt, names, sub_p
             bin_label[3] = 1
 
         label_path = names[i][:-4].replace('/', '-') + '-label.png'
+        cls_path = names[i][:-4].replace('/', '-') + '-cls.png'
         save_name = names[i].replace('/', '-')
         cv2.imwrite(os.path.join(save_path + '/' + sub_path, label_path),label)
         copyfile(os.path.join(img_root, names[i]), os.path.join(save_path + '/' + sub_path, save_name))
+        img, cls_label = create_label.getitem(os.path.join(save_path + '/' + sub_path, label_path), os.path.join(save_path + '/' + sub_path, save_name))
+        cv2.imwrite(os.path.join(save_path + '/' + sub_path, cls_path), cls_label)
 
-        train_gt_fp.write(sub_path + '/' + save_name + ' ' + sub_path + '/' + label_path + ' '+' '.join(list(map(str,bin_label))) + '\n')
+        train_gt_fp.write(sub_path + '/' + save_name + ' ' + sub_path + '/' + label_path + ' ' + sub_path + '/' + cls_path + ' '+' '.join(list(map(str,bin_label))) + '\n')
     train_gt_fp.close()
 
 def get_args():

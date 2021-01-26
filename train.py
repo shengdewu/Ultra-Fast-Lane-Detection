@@ -124,7 +124,7 @@ def reconstruct(cls, img):
 if __name__ == "__main__":
     torch.backends.cudnn.benchmark = True
 
-    args, cfg = merge_config()
+    args, cfg = merge_config(True)
 
     work_dir = get_work_dir(cfg)
 
@@ -169,11 +169,15 @@ if __name__ == "__main__":
     dist_print(len(train_loader))
     metric_dict = get_metric_dict(cfg)
     loss_dict = get_loss_dict(cfg)
-    #logger = get_logger(work_dir, cfg)
-    #cp_projects(work_dir)
+    # logger = get_logger(work_dir, cfg)
+    # cp_projects(work_dir)
 
     for epoch in range(resume_epoch, cfg.epoch):
+        # for i in range(len(train_loader)):
+        #     print('{}-{}'.format(epoch * len(train_loader) + i, scheduler.step(epoch * len(train_loader) + i)))
+        #     if epoch * len(train_loader) + i >= 191:
+        #         print('')
         train(net, train_loader, loss_dict, optimizer, scheduler, None, epoch, metric_dict, cfg.use_aux)
 
-        save_model(net, optimizer, epoch, work_dir, distributed)
+        #save_model(net, optimizer, epoch, work_dir, distributed)
     #logger.close()

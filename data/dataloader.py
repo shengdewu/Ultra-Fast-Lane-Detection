@@ -39,7 +39,7 @@ def get_train_loader(batch_size, data_root, griding_num, dataset, use_aux, distr
         train_dataset = LaneClsDataset(data_root,
                                            os.path.join(data_root, 'train_gt.txt'),
                                            img_transform=img_transform, target_transform=target_transform,
-                                           simu_transform = simu_transform,
+                                           simu_transform = None,
                                            griding_num=griding_num, 
                                            row_anchor = tusimple_row_anchor,
                                            segment_transform=segment_transform,use_aux=use_aux)

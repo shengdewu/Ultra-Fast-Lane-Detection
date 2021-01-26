@@ -1,10 +1,10 @@
 # DATA
 dataset='Tusimple'
-data_root = None
+data_root = 'F:/ultra-source'
 
 # TRAIN
 epoch = 100
-batch_size = 32
+batch_size = 8
 optimizer = 'Adam'    #['SGD','Adam']
 # learning_rate = 0.1
 learning_rate = 4e-4
@@ -30,8 +30,8 @@ shp_loss_w = 0.0
 # EXP
 note = ''
 
-log_path = None
-out_path = None
+log_path = 'F:/Ultra-Fast-Lane-Detection/tmp/log'
+out_path = 'F:/Ultra-Fast-Lane-Detection/tmp/img'
 # FINETUNE or RESUME MODEL PATH
 finetune = None
 resume = None
