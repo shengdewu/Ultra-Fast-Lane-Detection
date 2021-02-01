@@ -121,6 +121,18 @@ def reconstruct(cls, img):
             cv2.circle(lane_img, l, radius=3, color=color[j], thickness=3)
     return lane_img
 
+def pring_net_struct(path, net):
+    with open(os.path.join(path, 'pytorch_net.txt'), 'w') as w:
+        net_struct = '{}\n'.format(net)
+        w.write(net_struct)
+        w.write('-----------------param-------------------\n')
+        for name, param in net.named_parameters():
+            w.write('{} : {}\n'.format(name, param.size()))
+        w.write('-----------------param-------------------\n')
+        for param in net.state_dict():
+            w.write('{}-{}\n'.format(param, net.state_dict()[param].size()))
+    return
+
 if __name__ == "__main__":
     torch.backends.cudnn.benchmark = True
 
@@ -171,6 +183,8 @@ if __name__ == "__main__":
     loss_dict = get_loss_dict(cfg)
     #logger = get_logger(work_dir, cfg)
     #cp_projects(work_dir)
+
+    pring_net_struct(cfg.log_path, net)
 
     for epoch in range(resume_epoch, cfg.epoch):
         train(net, train_loader, loss_dict, optimizer, scheduler, None, epoch, metric_dict, cfg.use_aux)
