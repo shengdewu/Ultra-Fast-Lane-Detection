@@ -17,6 +17,8 @@ import configs.tusimple
 import data.constant
 import cv2
 
+import platform
+
 def inference(net, data_label, use_aux):
     if use_aux:
         img, cls_label, seg_label = data_label
@@ -136,7 +138,10 @@ def pring_net_struct(path, net):
 if __name__ == "__main__":
     torch.backends.cudnn.benchmark = True
 
-    args, cfg = merge_config()
+    is_win = False
+    if platform.system() == 'Windows':
+      is_win = True
+    args, cfg = merge_config(is_win)
 
     work_dir = get_work_dir(cfg)
 
